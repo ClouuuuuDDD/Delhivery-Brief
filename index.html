@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delhivery: The Logistics OS</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@500;700;800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#EE3C26',
+                            dark: '#1A1A1A',
+                            yellow: '#FFE117',
+                            green: '#10B981',
+                            surface: '#F9F9F9'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Syne', 'sans-serif'],
+                        body: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    boxShadow: {
+                        'brutal': '4px 4px 0px 0px rgba(26, 26, 26, 1)',
+                        'brutal-orange': '4px 4px 0px 0px rgba(238, 60, 38, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js for actual line chart rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Industrial / Utilitarian Aesthetic */
+        body {
+            background-color: #F9F9F9;
+            color: #1A1A1A;
+            overflow-x: hidden;
+        }
+        
+        .blueprint-bg {
+            background-image: 
+                linear-gradient(rgba(26, 26, 26, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(26, 26, 26, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .hard-grid {
+            display: grid;
+            gap: 1px;
+            background-color: #1A1A1A;
+            border: 1px solid #1A1A1A;
+        }
+        .hard-grid > * {
+            background-color: #F9F9F9;
+        }
+
+        /* Conveyor Belt Animation */
+        @keyframes conveyor {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .ticker-wrap {
+            overflow: hidden;
+            white-space: nowrap;
+            border-bottom: 2px solid #1A1A1A;
+            border-top: 2px solid #1A1A1A;
+            background: #FFE117;
+        }
+        .ticker {
+            display: inline-block;
+            animation: conveyor 25s linear infinite;
+        }
+
+        .structural-line {
+            position: relative;
+        }
+        .structural-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -20px;
+            height: 100%;
+            width: 4px;
+            background-color: #EE3C26;
+        }
+
+        /* Reveal on scroll */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="font-body selection:bg-brand-orange selection:text-white blueprint-bg">
+
+    <!-- Top Ticker -->
+    <div class="ticker-wrap py-2 font-mono text-sm uppercase font-bold tracking-widest text-brand-dark">
+        <div class="ticker">
+            <span class="mx-4"><i class="fas fa-boxes-stacked mr-2"></i> 4B+ PARCELS SHIPPED</span>
+            <span class="mx-4">•</span>
+            <span class="mx-4"><i class="fas fa-map-pin mr-2"></i> 18,850+ PIN CODES</span>
+            <span class="mx-4">•</span>
+            <span class="mx-4"><i class="fas fa-store mr-2"></i> 48K+ BUSINESSES</span>
+            <span class="mx-4">•</span>
+            <span class="mx-4"><i class="fas fa-warehouse mr-2"></i> 22M+ SQ FT INFRA</span>
+            <!-- duplicate for smooth loop -->
+            <span class="mx-4"><i class="fas fa-boxes-stacked mr-2"></i> 4B+ PARCELS SHIPPED</span>
+            <span class="mx-4">•</span>
+            <span class="mx-4"><i class="fas fa-map-pin mr-2"></i> 18,850+ PIN CODES</span>
+            <span class="mx-4">•</span>
+            <span class="mx-4"><i class="fas fa-store mr-2"></i> 48K+ BUSINESSES</span>
+            <span class="mx-4">•</span>
+            <span class="mx-4"><i class="fas fa-warehouse mr-2"></i> 22M+ SQ FT INFRA</span>
+        </div>
+    </div>
+
+    <main class="max-w-[1400px] mx-auto px-6 md:px-12 py-16">
+        
+        <!-- Section 1: Hero -->
+        <section class="min-h-[80vh] flex flex-col justify-center border-l-4 border-brand-orange pl-8 md:pl-16 mb-24 relative reveal">
+            <div class="absolute top-0 left-[-15px] bg-brand-surface p-2 text-brand-orange text-xl">
+                <i class="fas fa-network-wired"></i>
+            </div>
+            <p class="font-mono text-brand-orange mb-6 tracking-widest text-sm uppercase">SYS_INIT // Delhivery Core</p>
+            <h1 class="font-display text-6xl md:text-8xl lg:text-9xl font-bold leading-[0.9] text-brand-dark mb-8 uppercase tracking-tight">
+                Operating <br>
+                System <br>
+                <span class="text-transparent" style="-webkit-text-stroke: 2px #1A1A1A;">For Commerce</span>
+            </h1>
+            <p class="text-xl md:text-2xl max-w-3xl font-body leading-relaxed text-gray-700">
+                India's largest fully integrated logistics provider shipping 4B+ parcels across 18,850+ pin codes for 48K+ businesses.
+            </p>
+        </section>
+
+        <!-- Section 2: Positioning Snapshot -->
+        <section class="mb-32 reveal">
+            <h2 class="font-display text-4xl font-bold mb-12 uppercase border-b-2 border-brand-dark pb-4"><span class="text-brand-orange">01.</span> Positioning Snapshot</h2>
+            
+            <div class="hard-grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                <div class="p-8 hover:bg-brand-orange/10 transition-colors flex flex-col h-full">
+                    <div class="text-3xl text-brand-orange mb-6"><i class="fas fa-boxes-stacked"></i></div>
+                    <h3 class="font-mono font-bold text-lg mb-4 uppercase">What You Do</h3>
+                    <p class="text-sm text-gray-600 font-body leading-relaxed mt-auto">End-to-end logistics: Express Parcel, PTL/FTL freight, warehousing, cross-border, supply chain solutions + proprietary logistics OS powering it all.</p>
+                </div>
+                
+                <div class="p-8 hover:bg-brand-yellow/20 transition-colors flex flex-col h-full">
+                    <div class="text-3xl text-brand-yellow mb-6"><i class="fas fa-store text-[#D4B900]"></i></div>
+                    <h3 class="font-mono font-bold text-lg mb-4 uppercase">Who You Serve</h3>
+                    <p class="text-sm text-gray-600 font-body leading-relaxed mt-auto">D2C brands, e-commerce marketplaces, B2B enterprises, SMEs across FMCG, electronics, lifestyle, automotive + personal courier users.</p>
+                </div>
+
+                <div class="p-8 hover:bg-brand-orange/10 transition-colors flex flex-col h-full">
+                    <div class="text-3xl text-brand-orange mb-6"><i class="fas fa-warehouse"></i></div>
+                    <h3 class="font-mono font-bold text-lg mb-4 uppercase">Your Network</h3>
+                    <p class="text-sm text-gray-600 font-body leading-relaxed mt-auto">50 automated sort centers, 123 gateways, 4,500+ delivery centers, 74,000+ team members enabling 24/7/365 operations pan-India.</p>
+                </div>
+
+                <div class="p-8 hover:bg-brand-yellow/20 transition-colors flex flex-col h-full">
+                    <div class="text-3xl text-brand-yellow mb-6"><i class="fas fa-bolt text-[#D4B900]"></i></div>
+                    <h3 class="font-mono font-bold text-lg mb-4 uppercase">Your Edge</h3>
+                    <p class="text-sm text-gray-600 font-body leading-relaxed mt-auto">Self-developed logistics OS + nation-wide infrastructure + Ecom Express acquisition = unmatched scale, data intelligence, and last-mile reach.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Industry Context -->
+        <section class="mb-32 reveal">
+            <h2 class="font-display text-4xl font-bold mb-4 uppercase"><span class="text-brand-orange">02.</span> Infrastructure Moment</h2>
+            <p class="font-mono text-gray-500 mb-12">India's $243B logistics market is consolidating around tech-enabled, integrated players.</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="border-2 border-brand-dark p-6 bg-white shadow-brutal">
+                    <div class="font-mono text-xs uppercase text-gray-500 mb-4 border-b border-gray-200 pb-2">Market Extrapolation ($B)</div>
+                    <div class="relative w-full h-64 sm:h-72 lg:h-[300px]">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-xs font-mono text-gray-400">Sources: IMARC Group, The Report Cubes</div>
+                </div>
+
+                <div class="flex flex-col gap-6">
+                    <div class="structural-line pl-6">
+                        <div class="text-brand-orange mb-2"><i class="fas fa-chart-line"></i></div>
+                        <h4 class="font-bold font-mono uppercase mb-2">Market Consolidation Accelerating</h4>
+                        <p class="text-sm text-gray-600 mb-2">Acquisition of Ecom Express expanded market share by ~25%, signaling a shift toward integrated platforms.</p>
+                        <span class="inline-block bg-brand-orange/10 text-brand-orange font-mono text-xs px-2 py-1">21.5% e-com share + 25% expansion</span>
+                    </div>
+
+                    <div class="structural-line pl-6" style="--tw-bg-opacity: 1; border-color: #FFE117;">
+                        <style>.structural-line:nth-child(2)::before { background-color: #D4B900; }</style>
+                        <div class="text-[#D4B900] mb-2"><i class="fas fa-robot"></i></div>
+                        <h4 class="font-bold font-mono uppercase mb-2">Tech-First Differentiation</h4>
+                        <p class="text-sm text-gray-600 mb-2">Proprietary logistics OS & automation becoming table stakes for resilient supply chains.</p>
+                        <span class="inline-block bg-brand-yellow/20 text-[#D4B900] font-mono text-xs px-2 py-1">70% adopting AI by 2026</span>
+                    </div>
+
+                    <div class="structural-line pl-6">
+                        <style>.structural-line:nth-child(3)::before { background-color: #10B981; }</style>
+                        <div class="text-brand-green mb-2"><i class="fas fa-building"></i></div>
+                        <h4 class="font-bold font-mono uppercase mb-2">Infrastructure-Led Advantage</h4>
+                        <p class="text-sm text-gray-600 mb-2">Asset-heavy, integrated networks creating moats that aggregators struggle to replicate.</p>
+                        <span class="inline-block bg-brand-green/10 text-brand-green font-mono text-xs px-2 py-1">22M+ sq ft infra</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Competitive Landscape -->
+        <section class="mb-32 reveal">
+            <h2 class="font-display text-4xl font-bold mb-4 uppercase"><span class="text-brand-orange">03.</span> Competitive Matrix</h2>
+            <p class="font-mono text-gray-500 mb-12">Competing simultaneously against asset-heavy integrators and asset-light aggregators.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Delhivery -->
+                <div class="border-4 border-brand-orange p-8 bg-brand-orange/5 relative shadow-brutal-orange transform md:-translate-y-4">
+                    <div class="absolute -top-4 -right-4 bg-brand-orange text-white font-mono text-sm px-4 py-2 font-bold shadow-brutal">THE MOAT</div>
+                    <h3 class="font-display text-2xl font-bold mb-6">Delhivery</h3>
+                    <ul class="space-y-4 font-body text-sm">
+                        <li class="flex items-start"><i class="fas fa-check text-brand-orange mt-1 mr-3"></i> <span>4B+ parcels, 18,850+ pin codes, 48K+ businesses</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-brand-orange mt-1 mr-3"></i> <span>Full-stack: Express, PTL/FTL, Warehousing, OS</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-brand-orange mt-1 mr-3"></i> <span>50 automated sort centers, 22M+ sq ft infra</span></li>
+                        <li class="flex items-start"><i class="fas fa-check text-brand-orange mt-1 mr-3"></i> <span>Ecom Express acquisition expanding share by 25%</span></li>
+                    </ul>
+                </div>
+
+                <!-- Blue Dart / Gati -->
+                <div class="border-2 border-gray-300 p-8 bg-white">
+                    <h3 class="font-display text-2xl font-bold mb-6 text-gray-700">Blue Dart / Gati</h3>
+                    <ul class="space-y-4 font-body text-sm text-gray-500">
+                        <li class="flex items-start"><i class="fas fa-arrow-right text-gray-400 mt-1 mr-3"></i> <span>Asset-heavy, strong in express parcel & B2B</span></li>
+                        <li class="flex items-start"><i class="fas fa-arrow-right text-gray-400 mt-1 mr-3"></i> <span>Established brand, enterprise contracts focus</span></li>
+                        <li class="flex items-start"><i class="fas fa-arrow-right text-gray-400 mt-1 mr-3"></i> <span>Slower innovation cycles on OS/Tech layer</span></li>
+                        <li class="flex items-start"><i class="fas fa-arrow-right text-gray-400 mt-1 mr-3"></i> <span>Smaller pin code reach vs. Delhivery</span></li>
+                    </ul>
+                </div>
+
+                <!-- XpressBees / Shadowfax -->
+                <div class="border-2 border-gray-300 p-8 bg-white">
+                    <h3 class="font-display text-2xl font-bold mb-6 text-gray-700">XpressBees / Shadowfax</h3>
+                    <ul class="space-y-4 font-body text-sm text-gray-500">
+                        <li class="flex items-start"><i class="fas fa-arrow-right text-gray-400 mt-1 mr-3"></i> <span>Asset-light aggregator model, strong in last-mile</span></li>
+                        <li class="flex items-start"><i class="fas fa-arrow-right text-gray-400 mt-1 mr-3"></i> <span>Less control over line-haul, warehousing</span></li>
+                        <li class="flex items-start"><i class="fas fa-arrow-right text-gray-400 mt-1 mr-3"></i> <span>Dependent on third-party networks for scale</span></li>
+                        <li class="flex items-start"><i class="fas fa-arrow-right text-gray-400 mt-1 mr-3"></i> <span>Smaller infrastructure footprint</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Strategic Tension (Slider) -->
+        <section class="mb-32 bg-brand-dark text-brand-surface p-8 md:p-16 reveal">
+            <h2 class="font-display text-4xl font-bold mb-12 uppercase text-center"><span class="text-brand-orange">04.</span> Core Tension</h2>
+            
+            <div class="relative max-w-4xl mx-auto">
+                <div class="flex justify-between items-start mb-12">
+                    <div class="w-1/3 text-left">
+                        <div class="text-3xl text-brand-orange mb-4"><i class="fas fa-cubes"></i></div>
+                        <h4 class="font-mono font-bold mb-2">INFRA SCALE</h4>
+                        <p class="text-xs text-gray-400">Automated sort centers, proprietary OS, end-to-end control.</p>
+                    </div>
+                    <div class="w-1/3 text-right">
+                        <div class="text-3xl text-brand-yellow mb-4"><i class="fas fa-piggy-bank text-[#D4B900]"></i></div>
+                        <h4 class="font-mono font-bold mb-2">AGILITY</h4>
+                        <p class="text-xs text-gray-400">Partner-led last-mile, variable costs, service-line testing.</p>
+                    </div>
+                </div>
+
+                <!-- Industrial Slider -->
+                <div class="relative h-4 bg-gray-800 border border-gray-600">
+                    <div class="absolute top-1/2 left-[30%] -translate-y-1/2 w-8 h-8 bg-brand-orange shadow-[0_0_15px_rgba(238,60,38,0.5)] cursor-col-resize z-10 flex items-center justify-center border-2 border-brand-surface">
+                        <div class="w-1 h-4 border-l border-r border-[#7a2e12]"></div>
+                    </div>
+                    <div class="absolute top-0 left-0 h-full bg-brand-orange/30 w-[30%]"></div>
+                </div>
+                
+                <div class="mt-12 border-l-2 border-dashed border-gray-600 pl-6">
+                    <p class="font-mono text-sm leading-relaxed text-gray-300">
+                        <span class="text-brand-orange font-bold">THE CHALLENGE:</span> Optimizing for both integrated control and capital efficiency—balancing infrastructure investments with agile service expansion as you serve 48K+ diverse businesses.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7 & 8: Experience & Starters -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-32">
+            
+            <!-- Experience Mapping -->
+            <section class="reveal">
+                <h2 class="font-display text-3xl font-bold mb-8 uppercase border-b-2 border-brand-dark pb-4"><span class="text-brand-orange">05.</span> Operator Mapping</h2>
+                
+                <div class="space-y-6">
+                    <div class="p-6 border border-brand-dark hover:shadow-brutal transition-shadow bg-white">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 bg-brand-orange/10 flex items-center justify-center text-brand-orange border border-brand-orange/20"><i class="fas fa-compass"></i></div>
+                            <h3 class="font-mono font-bold uppercase">MVP Pivots</h3>
+                        </div>
+                        <p class="text-sm font-body text-gray-600 mb-3"><strong>Achievement:</strong> At HOTELMIND, drove strategic MVP pivot prioritizing commission leakage.</p>
+                        <p class="text-sm font-mono text-gray-500 bg-gray-50 p-2 border-l-2 border-brand-dark"><strong>Maps to:</strong> Ecom Express integration & network rationalization across 18k+ pin codes.</p>
+                    </div>
+
+                    <div class="p-6 border border-brand-dark hover:shadow-brutal transition-shadow bg-white">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 bg-brand-yellow/20 flex items-center justify-center text-[#D4B900] border border-brand-yellow/40"><i class="fas fa-users-gear"></i></div>
+                            <h3 class="font-mono font-bold uppercase">GTM Experiments</h3>
+                        </div>
+                        <p class="text-sm font-body text-gray-600 mb-3"><strong>Achievement:</strong> At Littlewise, launched affiliate programs driving 25% growth via 200+ influencers.</p>
+                        <p class="text-sm font-mono text-gray-500 bg-gray-50 p-2 border-l-2 border-brand-dark"><strong>Maps to:</strong> Multi-vertical GTM across D2C, B2B, and personal courier with tailored acquisition.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Thought Starters -->
+            <section class="reveal">
+                <h2 class="font-display text-3xl font-bold mb-8 uppercase border-b-2 border-brand-dark pb-4"><span class="text-brand-orange">06.</span> Dialogue Vectors</h2>
+                
+                <ul class="space-y-8 font-mono text-sm">
+                    <li class="relative pl-8">
+                        <i class="fas fa-square text-[8px] text-brand-orange absolute left-0 top-1.5"></i>
+                        <p class="text-gray-800 font-bold mb-2">Curious how you're personalizing the logistics OS experience for D2C brands vs. B2B enterprises?</p>
+                        <p class="text-gray-500">Context: Vastly different supply chain complexity needs across 48K+ businesses.</p>
+                    </li>
+                    <li class="relative pl-8">
+                        <i class="fas fa-square text-[8px] text-brand-green absolute left-0 top-1.5"></i>
+                        <p class="text-gray-800 font-bold mb-2">Has Ecom Express influenced the roadmap for predictive network optimization vs. reactive capacity?</p>
+                        <p class="text-gray-500">Context: Balancing infra scale with capital efficiency during peak seasons.</p>
+                    </li>
+                    <li class="relative pl-8">
+                        <i class="fas fa-square text-[8px] text-[#D4B900] absolute left-0 top-1.5"></i>
+                        <p class="text-gray-800 font-bold mb-2">How does A/B testing service onboarding flow align with the multi-vertical product strategy?</p>
+                        <p class="text-gray-500">Context: Optimizing persona-driven activation in 0→1 environments.</p>
+                    </li>
+                </ul>
+            </section>
+
+        </div>
+
+        <!-- Section 9: CTA -->
+        <section class="bg-brand-orange p-8 md:p-16 border-4 border-brand-dark shadow-brutal relative overflow-hidden reveal mb-16">
+            <div class="absolute inset-0 opacity-10 blueprint-bg" style="filter: invert(1);"></div>
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="max-w-2xl">
+                    <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-4 uppercase">Let's Execute This.</h2>
+                    <p class="text-white/90 font-mono mb-8">Discussing how to accelerate the OS for commerce across a $243B market.</p>
+                    
+                    <div class="bg-white p-6 border-2 border-brand-dark inline-block shadow-brutal w-full max-w-md">
+                        <ul class="space-y-3 font-mono text-sm">
+                            <li><i class="fas fa-user w-6 text-brand-orange"></i> <strong>Kunj Harjai</strong></li>
+                            <li><i class="fas fa-envelope w-6 text-brand-orange"></i> Kunj.24141@sscbs.du.ac.in</li>
+                            <li><i class="fas fa-phone w-6 text-brand-orange"></i> +91 93 109 29 096</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div>
+                    <a href="https://calendly.com/kunjharjai13/30min?month=2026-04" class="inline-block bg-brand-dark text-white font-display font-bold text-xl px-10 py-6 uppercase tracking-widest hover:bg-black transition-colors border-2 border-white shadow-[8px_8px_0px_0px_rgba(255,255,255,1)] hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:translate-y-1 hover:translate-x-1">
+                        Schedule a 15-min chat <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-brand-dark text-gray-500 py-8 border-t border-gray-800">
+        <div class="max-w-[1400px] mx-auto px-6 font-mono text-xs uppercase flex flex-col md:flex-row justify-between items-center">
+            <p>Prepared by Kunj Harjai | Product Operator | 0→1 Execution</p>
+            <p class="mt-4 md:mt-0">Sources Validated: Jan 2026 // [Delhivery.com, Inc42, IMARC]</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Reveal Animations
+        function reveal() {
+            var reveals = document.querySelectorAll('.reveal');
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 100;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add('active');
+                }
+            }
+        }
+        window.addEventListener('scroll', reveal);
+        reveal(); // Trigger on load
+
+        // Initialize Chart
+        const ctx = document.getElementById('marketChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['2025', '2027', '2029', '2032', '2034'],
+                datasets: [{
+                    label: 'Market Size ($B)',
+                    data: [243, 275, 310, 360, 429],
+                    borderColor: '#EE3C26',
+                    backgroundColor: 'rgba(238, 60, 38, 0.15)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#1A1A1A',
+                    pointBorderColor: '#EE3C26',
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(26, 26, 26, 0.1)', borderDash: [5, 5] },
+                        ticks: { font: { family: 'JetBrains Mono' } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(26, 26, 26, 0.1)', borderDash: [5, 5] },
+                        ticks: { font: { family: 'JetBrains Mono' } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
